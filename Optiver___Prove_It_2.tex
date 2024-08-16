@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{mathtools}  % brings in amsmath, also some improvements
+\usepackage{amssymb} % brings in amsfonts, incl \square
+
+\title{Optiver: Prove It | Ep 2: Another Random Walk}
+\author{Trung Nguyen}
+\date{August 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Today, we are going to solve Optiver's challenges from their second installment of their new Prove It series which I have really enjoyed. I will just be providing the mathematical proofs, but if you are interested to see what these formulas and equations mean, please see this video for reference (problems are near the end): https://www.youtube.com/watch?v=u76c4QDHXME 
+
+\section{Exercise 1}
+
+\subsection{Problem:}
+Prove that for a random walk from $0$ to $n$, the expected number of blocks is $n^2$. 
+
+\subsection{Proof.} 
+For some context, we are walking on the integer number line from $0$ to $n$ where moving one block means moving from $k$ to either $k+1$ or $k-1$. The walk ends when we reach $n$. When we are at $0$, we automatically move to $1$ the next turn. For any other place $0<k<n$ we move to either $k+1$ or $k-1$ with equal probability. 
+
+We can encode all of this information using states and expected value. Let $E_k$ denote the expected value of the number of steps we need to take when at $k$ before reaching $n$. For $0<k<n$, we have $$E_k=\frac{1}{2}(E_{k-1}+1)+\frac{1}{2}(E_{k+1}+1)$$ since its equally likely we move in either direction, towards $n$ or towards $0$. Note that we also have $$E_0=1+E_1$$ and $$E_n=0$$ based on the boundary conditions. 
+
+To solve this problem, we are going to try and find a closed form for $E_k$. Note that $$E_k=\frac{1}{2}(E_{k-1}+1)+\frac{1}{2}(E_{k+1}+1)$$ rearranges to $$E_{k+1}=2\cdot E_k-E_{k-1}-2$$ and shifting the index down by $1$ gives $$E_{k}=2\cdot E_{k-1}-E_{k-2}-2$$ so each state $E_k$ depends recursively on the previous two states. 
+
+Let $E_0=a$. Since $E_0=1+E_1$, we have $E_1=a-1$. We now have our $2$ base states and we can recursively generate the rest of them. For example, using $E_{k}=2\cdot E_{k-1}-E_{k-2}-2$, we find that $$E_2=a-4$$ and $$E_3=a-9$$ so it looks like our closed form is $$E_k=a-k^2$$ which we can prove with induction. 
+
+The base cases are trivial (we already did them). Hence, assume $E_{m-2}=a-(m-2)^2$ and $E_{m-1}=a-(m-1)^2$ for the inductive hypothesis. 
+
+For the inductive step, compute 
+\begin{align*} 
+E_m&= 2\cdot E_{m-1}-E_{m-2}-2\\
+&=2(a-(m-1)^2)-(a-(m-2)^2)-2\\
+&= a-m^2
+\end{align*}
+which completes the induction. 
+
+So we know that $E_k=a-k^2$ so all we need is to compute $a$. Fortunately, recall that $E_n=0$. Thus $0=E_n=a-n^2$ so $a=n^2$. This tells us that $E_k=n^2-k^2$ and specifically $\boxed{E_0=n^2}$ as required.
+$\square$
+
+\section{Exercise 2}
+
+\subsection{Problem:} What is the expected number of blocks to go from $0$ to $n$ if the coin is biased and is twice as likely to land on tails.
+
+\subsection{Proof.} The setup for this problem is exactly the same as the first one, except instead of moving equally likely to $E_{k-1}$ and $E_{k+1}$, we now have a $\frac{2}{3}$ chance of moving to $E_{k-1}$ and a $\frac{1}{3}$ chance of moving to $E_{k+1}$ if we are at state $E_k$. Thus, $$E_k=\frac{2}{3}(E_{k-1}+1)+\frac{1}{3}(E_{k+1}+1)$$ which rearranges to $$E_{k+1}=3E_k-2E_{k-1}-3.$$ Again, let the base cases be $E_0=a$ and $E_1=a-1$. We can then compute the first few terms 
+\begin{align*}
+E_0&=a\\
+E_1&= a=1\\
+E_2&= a-6\\
+E_3 &= a-19\\
+E_4 &= a-48
+\end{align*} which don't appear to have an easy pattern to observe. Thus, this time we are going to have to solve the recursion directly using characteristic equations. We already have $$E_{k+1}=3E_k-2E_{k-1}-3.$$ Shifting the index down by $1$ and moving everything to the right hand side of the equation gives $$0=-E_{k}+3E_{k-1}-2E_{k-2}-3.$$ Subtracting the second from the first, we get $$E_{k+1}=4E_k-5E_{k-1}+2E_{k-2}$$ and shifting the index down by $1$ gives us $$E_{k}=4E_{k-1}-5E_{k-2}+2E_{k-3}$$ so each state $E_k$ depends recursively on the previous three states. The base cases are $E_0=a,E_1=a-1,E_2=a-6$ and we can check that this recursion is correct by computing $E_3=4(a-6)-5(a-1)+2(a)=a-19$ which is what we got earlier. 
+
+The characteristic equation of the $E_{k}=4E_{k-1}-5E_{k-2}+2E_{k-3}$ recursive formula is $$r^3-4r^2+5r-2=0$$ which has roots $1,1,2$. Because it has a double root at $1$, the general solution to this equation is $$E_k=\lambda_1\cdot 1^k+\lambda_2\cdot k\cdot 1^k+\lambda_3\cdot 2^k$$ for constants $\lambda_1,\lambda_2,\lambda_3$. Setting $k=0,1,2$ gives us the system 
+\begin{align*}
+\lambda_1+\lambda_3&=a\\
+\lambda_1+\lambda_2-2\lambda_3&=a-1\\
+\lambda_1+2\lambda_2+4\lambda_3&=a-6
+\end{align*}
+which solves to $\lambda_1=a+4,\lambda_2=3,\lambda_3=-4$.Thus, $$E_k=(a+4)+3k-4\cdot 2^k.$$ As before, $0=E_n=(a+4)+3n-4\cdot 2^n$ so $a=2^{n+2}-3n-4$. This tells us that $E_k=2^{n+2}-3n-4-(2^{k+2}-3k-4)$ and specifically $\boxed{E_0=2^{n+2}-3n-4}$. $\square$
+
+\end{document}
